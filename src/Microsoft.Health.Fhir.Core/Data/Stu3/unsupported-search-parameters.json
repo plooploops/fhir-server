@@ -10,8 +10,6 @@
         "http://hl7.org/fhir/SearchParameter/CapabilityStatement-version",
         "http://hl7.org/fhir/SearchParameter/ChargeItem-price-override",
         "http://hl7.org/fhir/SearchParameter/CodeSystem-version",
-        "http://hl7.org/fhir/SearchParameter/ConceptMap-source-uri",
-        "http://hl7.org/fhir/SearchParameter/ConceptMap-target-uri",
         "http://hl7.org/fhir/SearchParameter/ConceptMap-version",
         "http://hl7.org/fhir/SearchParameter/DataElement-version",
         "http://hl7.org/fhir/SearchParameter/Encounter-length",
@@ -44,9 +42,6 @@
         "http://hl7.org/fhir/SearchParameter/Device-udi-carrier",
         "http://hl7.org/fhir/SearchParameter/Group-characteristic-value",
         "http://hl7.org/fhir/SearchParameter/Group-value",
-        "http://hl7.org/fhir/SearchParameter/ImplementationGuide-resource",
-        "http://hl7.org/fhir/SearchParameter/ProcedureRequest-occurrence",
-        "http://hl7.org/fhir/SearchParameter/Provenance-agent",
-        "http://hl7.org/fhir/SearchParameter/StructureDefinition-valueset"
+        "http://hl7.org/fhir/SearchParameter/ProcedureRequest-occurrence"
     ]
 }

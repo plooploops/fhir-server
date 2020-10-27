@@ -1,6 +1,5 @@
 {
     "Unsupported": [
-        "http://hl7.org/fhir/SearchParameter/Resource-profile",
         "http://hl7.org/fhir/SearchParameter/ActivityDefinition-composed-of",
         "http://hl7.org/fhir/SearchParameter/ActivityDefinition-depends-on",
         "http://hl7.org/fhir/SearchParameter/ActivityDefinition-derived-from",
@@ -23,9 +22,7 @@
         "http://hl7.org/fhir/SearchParameter/Communication-instantiates-canonical",
         "http://hl7.org/fhir/SearchParameter/ConceptMap-other",
         "http://hl7.org/fhir/SearchParameter/ConceptMap-source",
-        "http://hl7.org/fhir/SearchParameter/ConceptMap-source-uri",
         "http://hl7.org/fhir/SearchParameter/ConceptMap-target",
-        "http://hl7.org/fhir/SearchParameter/ConceptMap-target-uri",
         "http://hl7.org/fhir/SearchParameter/DeviceRequest-instantiates-canonical",
         "http://hl7.org/fhir/SearchParameter/DocumentReference-location",
         "http://hl7.org/fhir/SearchParameter/EffectEvidenceSynthesis-version",

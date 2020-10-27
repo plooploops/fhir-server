@@ -47,7 +47,7 @@ namespace Microsoft.Health.Fhir.Core.Features.Search.Expressions.Parsers
                 { SearchParamType.Reference, referenceSearchValueParser.Parse },
                 { SearchParamType.String, StringSearchValue.Parse },
                 { SearchParamType.Token, TokenSearchValue.Parse },
-                { SearchParamType.Uri, UriSearchValue.Parse },
+                { SearchParamType.Uri, CanonicalSearchValue.Parse },
             };
         }
 

@@ -381,6 +381,8 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Schema.Model
             internal readonly BigIntColumn ResourceSurrogateId = new BigIntColumn("ResourceSurrogateId");
             internal readonly SmallIntColumn SearchParamId = new SmallIntColumn("SearchParamId");
             internal readonly VarCharColumn Uri = new VarCharColumn("Uri", 256, "Latin1_General_100_CS_AS");
+            internal readonly NullableVarCharColumn Version = new NullableVarCharColumn("Version", 256, "Latin1_General_100_CS_AS");
+            internal readonly NullableVarCharColumn Fragment = new NullableVarCharColumn("Fragment", 256, "Latin1_General_100_CS_AS");
             internal readonly BitColumn IsHistory = new BitColumn("IsHistory");
         }
 
@@ -1587,26 +1589,32 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Schema.Model
 
         private class UriSearchParamTableTypeTableValuedParameterDefinition : TableValuedParameterDefinition<UriSearchParamTableTypeRow>
         {
-            internal UriSearchParamTableTypeTableValuedParameterDefinition(System.String parameterName): base(parameterName, "dbo.UriSearchParamTableType_1")
+            internal UriSearchParamTableTypeTableValuedParameterDefinition(System.String parameterName): base(parameterName, "dbo.UriSearchParamTableType_2")
             {
             }
 
             internal readonly SmallIntColumn SearchParamId = new SmallIntColumn("SearchParamId");
             internal readonly VarCharColumn Uri = new VarCharColumn("Uri", 256, "Latin1_General_100_CS_AS");
-            protected override global::System.Collections.Generic.IEnumerable<Column> Columns => new Column[]{SearchParamId, Uri};
+            internal readonly NullableVarCharColumn Version = new NullableVarCharColumn("Version", 256, "Latin1_General_100_CS_AS");
+            internal readonly NullableVarCharColumn Fragment = new NullableVarCharColumn("Fragment", 256, "Latin1_General_100_CS_AS");
+            protected override global::System.Collections.Generic.IEnumerable<Column> Columns => new Column[]{SearchParamId, Uri, Version, Fragment};
             protected override void FillSqlDataRecord(global::Microsoft.Data.SqlClient.Server.SqlDataRecord record, UriSearchParamTableTypeRow rowData)
             {
                 SearchParamId.Set(record, 0, rowData.SearchParamId);
                 Uri.Set(record, 1, rowData.Uri);
+                Version.Set(record, 2, rowData.Version);
+                Fragment.Set(record, 3, rowData.Fragment);
             }
         }
 
         internal struct UriSearchParamTableTypeRow
         {
-            internal UriSearchParamTableTypeRow(System.Int16 SearchParamId, System.String Uri)
+            internal UriSearchParamTableTypeRow(System.Int16 SearchParamId, System.String Uri, System.String Version, System.String Fragment)
             {
                 this.SearchParamId = SearchParamId;
                 this.Uri = Uri;
+                this.Version = Version;
+                this.Fragment = Fragment;
             }
 
             internal System.Int16 SearchParamId
@@ -1615,6 +1623,16 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Schema.Model
             }
 
             internal System.String Uri
+            {
+                get;
+            }
+
+            internal System.String Version
+            {
+                get;
+            }
+
+            internal System.String Fragment
             {
                 get;
             }

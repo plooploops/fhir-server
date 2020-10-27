@@ -3,11 +3,9 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 // -------------------------------------------------------------------------------------------------
 
-namespace Microsoft.Health.Fhir.SqlServer.Features.Schema
+namespace Microsoft.Health.Fhir.Stu3.Tests.E2E.Rest.Search
 {
-    public static class SchemaVersionConstants
+    public class CanonicalSearchTests
     {
-        public const int Max = (int)SchemaVersion.V6;
-        public const int Min = (int)SchemaVersion.V4;
     }
 }

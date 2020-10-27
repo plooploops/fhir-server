@@ -17,7 +17,8 @@ namespace Microsoft.Health.Fhir.SqlServer.Features.Storage.TvpRowGeneration
 
         internal override bool TryGenerateRow(short searchParamId, UriSearchValue searchValue, out VLatest.UriSearchParamTableTypeRow row)
         {
-            row = new VLatest.UriSearchParamTableTypeRow(searchParamId, searchValue.Uri);
+            var canonical = searchValue as CanonicalSearchValue;
+            row = new VLatest.UriSearchParamTableTypeRow(searchParamId, searchValue.Uri, canonical?.Version, canonical?.Fragment);
             return true;
         }
     }
