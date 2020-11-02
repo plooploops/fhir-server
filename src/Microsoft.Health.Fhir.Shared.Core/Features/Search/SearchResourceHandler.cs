@@ -55,7 +55,7 @@ namespace Microsoft.Health.Fhir.Core.Features.Search
 
             ResourceElement bundle = _bundleFactory.CreateSearchBundle(searchResult);
 
-            return new SearchResourceResponse(bundle);
+            return new SearchResourceResponse(bundle, searchResult.UnsupportedSearchParameters, searchResult.UnsupportedSortingParameters, searchResult.ContinuationToken, searchResult.TotalCount);
         }
     }
 }

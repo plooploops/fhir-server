@@ -14,17 +14,31 @@ namespace Microsoft.Health.Fhir.Core.Features.Definition.BundleWrappers
     internal class BundleEntryWrapper
     {
         private readonly Lazy<ITypedElement> _entry;
+        private readonly Lazy<bool?> _isMatch;
+        private ITypedElement _rawEntry;
 
         public BundleEntryWrapper(ITypedElement entry)
         {
             EnsureArg.IsNotNull(entry, nameof(entry));
 
+            _rawEntry = entry;
             _entry = new Lazy<ITypedElement>(() => entry.Select("resource").FirstOrDefault());
+            _isMatch = new Lazy<bool?>(() => string.Equals(entry.Scalar("search.mode")?.ToString(), "match", StringComparison.Ordinal));
+        }
+
+        public ITypedElement Entry
+        {
+            get => _rawEntry;
         }
 
         public ITypedElement Resource
         {
             get => _entry.Value;
+        }
+
+        public bool IsMatch
+        {
+            get => _isMatch.Value.GetValueOrDefault(true);
         }
     }
 }

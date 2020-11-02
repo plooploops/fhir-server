@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnsureThat;
+using Hl7.Fhir.ElementModel;
 using Hl7.Fhir.Model;
+using Hl7.FhirPath;
 using Microsoft.Health.Core;
 using Microsoft.Health.Fhir.Core.Extensions;
 using Microsoft.Health.Fhir.Core.Features.Context;
@@ -23,22 +25,27 @@ namespace Microsoft.Health.Fhir.Core.Features.Search
     {
         private readonly IUrlResolver _urlResolver;
         private readonly IFhirRequestContextAccessor _fhirRequestContextAccessor;
+        private readonly IModelInfoProvider _modelInfoProvider;
+        private readonly IResourceDeserializer _deserializer;
 
-        public BundleFactory(IUrlResolver urlResolver, IFhirRequestContextAccessor fhirRequestContextAccessor)
+        public BundleFactory(IUrlResolver urlResolver, IFhirRequestContextAccessor fhirRequestContextAccessor, IModelInfoProvider modelInfoProvider, IResourceDeserializer deserializer)
         {
             EnsureArg.IsNotNull(urlResolver, nameof(urlResolver));
             EnsureArg.IsNotNull(fhirRequestContextAccessor, nameof(fhirRequestContextAccessor));
 
             _urlResolver = urlResolver;
             _fhirRequestContextAccessor = fhirRequestContextAccessor;
+            _modelInfoProvider = modelInfoProvider;
+            _deserializer = deserializer;
         }
 
         public ResourceElement CreateSearchBundle(SearchResult result)
         {
             return CreateBundle(result, Bundle.BundleType.Searchset, r =>
             {
-                var resource = new RawBundleEntryComponent(r.Resource);
+                var resource = new Bundle.EntryComponent();
 
+                resource.Resource = _deserializer.Deserialize(r.Resource).ToPoco();
                 resource.FullUrlElement = new FhirUri(_urlResolver.ResolveResourceWrapperUrl(r.Resource));
                 resource.Search = new Bundle.SearchComponent
                 {
@@ -76,6 +83,42 @@ namespace Microsoft.Health.Fhir.Core.Features.Search
         {
             EnsureArg.IsNotNull(result, nameof(result));
 
+            return CreateBundle(
+                type.ToString(),
+                result.Results.Select(selectionFunction).ToArray(),
+                result.UnsupportedSearchParameters,
+                result.UnsupportedSortingParameters,
+                result.ContinuationToken,
+                result.TotalCount,
+                result.Partial);
+        }
+
+        public object ConvertToPocoEntryComponent(ITypedElement entryComponent)
+        {
+            Bundle.SearchEntryMode? mode = Enum.TryParse(entryComponent.Scalar("search.mode")?.ToString(), out Bundle.SearchEntryMode parsedMode) ? parsedMode : (Bundle.SearchEntryMode?)null;
+
+            return new Bundle.EntryComponent
+            {
+                Resource = entryComponent.Select("resource").First().ToPoco<Resource>(),
+                Search = new Bundle.SearchComponent
+                {
+                    Mode = mode,
+                },
+            };
+        }
+
+        public ResourceElement CreateBundle(
+            string bundleType,
+            IEnumerable<object> entries,
+            IEnumerable<Tuple<string, string>> unsupportedSearchParams = null,
+            IReadOnlyList<(string parameterName, string reason)> unsupportedSortingParameters = null,
+            string continuationToken = null,
+            int? totalCount = null,
+            bool? isPartial = null)
+        {
+            EnsureArg.IsNotNull(bundleType, nameof(bundleType));
+            EnsureArg.IsNotNull(entries, nameof(entries));
+
             // Create the bundle from the result.
             var bundle = new Bundle();
 
@@ -94,22 +137,23 @@ namespace Microsoft.Health.Fhir.Core.Features.Search
                         Mode = Bundle.SearchEntryMode.Outcome,
                     },
                 });
+
+                _fhirRequestContextAccessor.FhirRequestContext.BundleIssues.Clear();
             }
 
-            IEnumerable<Bundle.EntryComponent> entries = result.Results.Select(selectionFunction);
+            // Hacky conversion, but for proof-of-concept...
+            bundle.Entry.AddRange(entries.Cast<Bundle.EntryComponent>());
 
-            bundle.Entry.AddRange(entries);
-
-            if (result.ContinuationToken != null)
+            if (continuationToken != null)
             {
                 bundle.NextLink = _urlResolver.ResolveRouteUrl(
-                    result.UnsupportedSearchParameters,
-                    result.UnsupportedSortingParameters,
-                    Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(result.ContinuationToken)),
+                    unsupportedSearchParams,
+                    unsupportedSortingParameters,
+                    Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(continuationToken)),
                     true);
             }
 
-            if (result.Partial)
+            if (isPartial.GetValueOrDefault())
             {
                 // if the query resulted in a partial indication, add appropriate outcome
                 // as an entry
@@ -133,17 +177,29 @@ namespace Microsoft.Health.Fhir.Core.Features.Search
             }
 
             // Add the self link to indicate which search parameters were used.
-            bundle.SelfLink = _urlResolver.ResolveRouteUrl(result.UnsupportedSearchParameters, result.UnsupportedSortingParameters);
+            bundle.SelfLink = _urlResolver.ResolveRouteUrl(unsupportedSearchParams, unsupportedSortingParameters);
 
             bundle.Id = _fhirRequestContextAccessor.FhirRequestContext.CorrelationId;
-            bundle.Type = type;
-            bundle.Total = result?.TotalCount;
+            bundle.Type = Enum.Parse<Bundle.BundleType>(bundleType);
+            bundle.Total = totalCount;
             bundle.Meta = new Meta
             {
                 LastUpdated = Clock.UtcNow,
             };
 
             return bundle.ToResourceElement();
+        }
+
+        public object CreateIncludedEntryComponent(ITypedElement resource)
+        {
+            return new Bundle.EntryComponent
+            {
+                Resource = resource.ToPoco<Resource>(),
+                Search = new Bundle.SearchComponent
+                {
+                    Mode = Bundle.SearchEntryMode.Include,
+                },
+            };
         }
     }
 }
