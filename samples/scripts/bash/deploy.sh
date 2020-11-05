@@ -54,8 +54,8 @@ az webapp config appsettings set --settings ApplicationInsightsAgent_EXTENSION_V
 
 az webapp show -n $serviceName -g $rg
 
-# try with unsecure first.  
-az webapp config appsettings set --settings FhirServer:Security:Enabled="True" -n $serviceName -g $rg
+# try with unsecure first.
+az webapp config appsettings set --settings FhirServer:Security:Enabled="False" -n $serviceName -g $rg
 
 curl -X GET "https://$serviceName.azurewebsites.net/metadata"
 
